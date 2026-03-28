@@ -35,6 +35,7 @@ gui:
   # 红包物品Lore
   item-lore:
     - "&7红包名称: &f{name}"
+    - "&7红包ID: &e{id}"
     - "&7总金额: &a{amount}"
     - "&7总数量: &e{count}"
     - "&7剩余数量: &b{remaining}"
@@ -47,11 +48,12 @@ messages:
   prefix: "&8[&cSyExtract&8] &r"
   # 成功消息
   success:
-    create: "&a成功创建红包! 扣除金额: &e{amount} &a(含手续费: &e{fee}&a)"
+    create: "&a成功创建红包! ID: &e{id} &a扣除金额: &e{amount} &a(含手续费: &e{fee}&a)"
     claim: "&a恭喜! 你领取了 &e{sender} &a的红包, 获得 &6{amount} &a金币!"
     reload: "&a配置重载成功!"
     ban: "&a成功封禁玩家 &e{player} &a, 到期时间: &c{expire}"
     unban: "&a成功解封玩家 &e{player}"
+    broadcast: "&a成功广播红包 &e{id}"
   # 错误消息
   error:
     no-permission: "&c你没有权限执行此操作!"
@@ -68,11 +70,19 @@ messages:
     invalid-time: "&c无效的时间格式! 请使用: 1h, 1d, 1w 等"
   # 提示消息
   info:
+    refund: "&a你的红包 &e{name} &a已过期, 未领取的 &6{amount} &a金币已原路返回!"
     help:
       - "&6========== &cSyExtract &6=========="
       - "&e/sye create <名称> <金额> <数量> &7- 创建红包"
       - "&e/sye open &7- 打开红包GUI"
+      - "&e/sye broadcast <红包ID> &7- 广播红包"
+      - "&e/sye claim <红包ID> &7- 领取指定红包"
       - "&e/sye ban <玩家> <时间> &7- 封禁玩家"
       - "&e/sye unban <玩家> &7- 解封玩家"
       - "&e/sye reload &7- 重载配置"
       - "&6================================"
+  # 广播消息设置
+  broadcast:
+    format: "<gold><bold>🧧 红包来袭!</bold></gold> <yellow>{sender}</yellow> <gray>发放了一个红包</gray> <gold><bold>[{name}]</bold></gold> <gray>总金额: </gray><green>{amount}</green> <gray>金币</gray>"
+    click-text: "<green><bold>[立即领取]</bold></green>"
+    hover-text: "<yellow>点击领取红包!</yellow>"

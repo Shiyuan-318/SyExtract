@@ -5,6 +5,7 @@ import java.util.*;
 public class RedEnvelope {
 
     private final UUID id;
+    private final String shortId;
     private final UUID sender;
     private final String senderName;
     private final String name;
@@ -15,9 +16,11 @@ public class RedEnvelope {
     private final List<Double> amounts;
     private final Set<UUID> claimedPlayers;
     private int remainingCount;
+    private boolean refunded;
 
     public RedEnvelope(UUID sender, String senderName, String name, double totalAmount, int totalCount, long expireHours) {
         this.id = UUID.randomUUID();
+        this.shortId = generateShortId();
         this.sender = sender;
         this.senderName = senderName;
         this.name = name;
@@ -28,6 +31,17 @@ public class RedEnvelope {
         this.remainingCount = totalCount;
         this.claimedPlayers = new HashSet<>();
         this.amounts = generateRandomAmounts(totalAmount, totalCount);
+        this.refunded = false;
+    }
+
+    private String generateShortId() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 6; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 
     private List<Double> generateRandomAmounts(double total, int count) {
@@ -83,8 +97,24 @@ public class RedEnvelope {
         return Math.round((totalAmount - claimed) * 100.0) / 100.0;
     }
 
+    public double getUnclaimedAmount() {
+        return getRemainingAmount();
+    }
+
+    public boolean isRefunded() {
+        return refunded;
+    }
+
+    public void setRefunded(boolean refunded) {
+        this.refunded = refunded;
+    }
+
     public UUID getId() {
         return id;
+    }
+
+    public String getShortId() {
+        return shortId;
     }
 
     public UUID getSender() {

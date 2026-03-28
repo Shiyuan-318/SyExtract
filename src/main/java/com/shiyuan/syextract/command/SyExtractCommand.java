@@ -2,6 +2,7 @@ package com.shiyuan.syextract.command;
 
 import com.shiyuan.syextract.SyExtractPlugin;
 import com.shiyuan.syextract.model.PlayerBan;
+import com.shiyuan.syextract.model.RedEnvelope;
 import com.shiyuan.syextract.util.MessageUtil;
 import com.shiyuan.syextract.util.TimeUtil;
 import org.bukkit.Bukkit;
@@ -39,6 +40,8 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
             case "ban", "b" -> handleBan(sender, args);
             case "unban", "u" -> handleUnban(sender, args);
             case "reload", "r" -> handleReload(sender);
+            case "broadcast", "br" -> handleBroadcast(sender, args);
+            case "claim", "cl" -> handleClaim(sender, args);
             default -> sendHelp(sender);
         }
 
@@ -119,7 +122,7 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        plugin.getRedEnvelopeManager().createEnvelope(
+        RedEnvelope envelope = plugin.getRedEnvelopeManager().createEnvelope(
             player.getUniqueId(), 
             player.getName(), 
             name, 
@@ -128,7 +131,9 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
         );
 
         sender.sendMessage(MessageUtil.getMessage("success.create", 
-            Map.of("amount", String.format("%.2f", amount), "fee", String.format("%.2f", fee))));
+            Map.of("amount", String.format("%.2f", amount), 
+                   "fee", String.format("%.2f", fee),
+                   "id", envelope.getShortId())));
     }
 
     private void handleOpen(CommandSender sender) {
@@ -214,6 +219,89 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(MessageUtil.getMessage("success.reload"));
     }
 
+    private void handleBroadcast(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("syextract.broadcast")) {
+            sender.sendMessage(MessageUtil.getMessage("error.no-permission"));
+            return;
+        }
+
+        if (args.length < 2) {
+            sender.sendMessage(MessageUtil.colorize("&c用法: /sye broadcast <红包ID>"));
+            return;
+        }
+
+        String shortId = args[1].toUpperCase();
+        RedEnvelope envelope = plugin.getRedEnvelopeManager().getEnvelopeByShortId(shortId);
+
+        if (envelope == null) {
+            sender.sendMessage(MessageUtil.getMessage("error.envelope-not-found"));
+            return;
+        }
+
+        String broadcastFormat = plugin.getConfig().getString("messages.broadcast.format", 
+            "§6§l🧧 红包来袭! §e{sender} §7发放了一个红包 §6§l[{name}] §7总金额: §a{amount} §7金币");
+        
+        String clickText = plugin.getConfig().getString("messages.broadcast.click-text", "§a§l[立即领取]");
+        String hoverText = plugin.getConfig().getString("messages.broadcast.hover-text", "§e点击领取红包!");
+
+        String message = broadcastFormat
+            .replace("{sender}", envelope.getSenderName())
+            .replace("{name}", envelope.getName())
+            .replace("{amount}", String.format("%.2f", envelope.getTotalAmount()))
+            .replace("{id}", envelope.getShortId());
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendMessage(MessageUtil.colorize(message));
+            player.sendMessage(MessageUtil.colorize(" ") + createClickableMessage(clickText, hoverText, "/sye claim " + envelope.getShortId()));
+        }
+
+        sender.sendMessage(MessageUtil.getMessage("success.broadcast", 
+            Map.of("id", envelope.getShortId())));
+    }
+
+    private String createClickableMessage(String text, String hover, String command) {
+        return text;
+    }
+
+    private void handleClaim(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(MessageUtil.getMessage("error.no-permission"));
+            return;
+        }
+
+        if (!sender.hasPermission("syextract.claim")) {
+            sender.sendMessage(MessageUtil.getMessage("error.no-permission"));
+            return;
+        }
+
+        if (!plugin.getBanManager().canClaimEnvelope(player.getUniqueId())) {
+            PlayerBan ban = plugin.getBanManager().getBan(player.getUniqueId());
+            sender.sendMessage(MessageUtil.getMessage("error.banned-claim", 
+                Map.of("expire", DATE_FORMAT.format(new Date(ban.getExpireTime())))));
+            return;
+        }
+
+        if (args.length < 2) {
+            sender.sendMessage(MessageUtil.colorize("&c用法: /sye claim <红包ID>"));
+            return;
+        }
+
+        String shortId = args[1].toUpperCase();
+        double amount = plugin.getRedEnvelopeManager().claimEnvelopeByShortId(shortId, player.getUniqueId());
+
+        if (amount > 0) {
+            RedEnvelope envelope = plugin.getRedEnvelopeManager().getEnvelopeByShortId(shortId);
+            String senderName = envelope != null ? envelope.getSenderName() : "Unknown";
+            
+            plugin.getEconomyManager().deposit(player.getUniqueId(), amount);
+            
+            player.sendMessage(MessageUtil.getMessage("success.claim", 
+                Map.of("sender", senderName, "amount", String.format("%.2f", amount))));
+        } else {
+            player.sendMessage(MessageUtil.getMessage("error.envelope-not-found"));
+        }
+    }
+
     private void sendHelp(CommandSender sender) {
         List<String> helpMessages = MessageUtil.getMessageList("info.help");
         for (String message : helpMessages) {
@@ -246,6 +334,8 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
             if (sender.hasPermission("syextract.ban")) subCommands.add("ban");
             if (sender.hasPermission("syextract.unban")) subCommands.add("unban");
             if (sender.hasPermission("syextract.reload")) subCommands.add("reload");
+            if (sender.hasPermission("syextract.broadcast")) subCommands.add("broadcast");
+            if (sender.hasPermission("syextract.claim")) subCommands.add("claim");
             
             String partial = args[0].toLowerCase();
             for (String sub : subCommands) {
@@ -262,6 +352,16 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     if (player.getName().toLowerCase().startsWith(partial)) {
                         completions.add(player.getName());
+                    }
+                }
+            } else if (subCommand.equals("broadcast") && sender.hasPermission("syextract.broadcast")) {
+                for (RedEnvelope envelope : plugin.getRedEnvelopeManager().getAvailableEnvelopes()) {
+                    completions.add(envelope.getShortId());
+                }
+            } else if (subCommand.equals("claim") && sender.hasPermission("syextract.claim")) {
+                if (sender instanceof Player player) {
+                    for (RedEnvelope envelope : plugin.getRedEnvelopeManager().getAvailableEnvelopesForPlayer(player.getUniqueId())) {
+                        completions.add(envelope.getShortId());
                     }
                 }
             }

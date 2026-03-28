@@ -46,32 +46,29 @@ public class GUIManager implements Listener {
 
         List<RedEnvelope> availableEnvelopes = plugin.getRedEnvelopeManager().getAvailableEnvelopesForPlayer(player.getUniqueId());
         
-        if (availableEnvelopes.isEmpty()) {
-            player.sendMessage(MessageUtil.getMessage("error.no-envelopes"));
-            return;
-        }
-
-        int totalPages = (int) Math.ceil((double) availableEnvelopes.size() / ITEMS_PER_PAGE);
+        int totalPages = Math.max(1, (int) Math.ceil((double) availableEnvelopes.size() / ITEMS_PER_PAGE));
         if (page < 0) page = 0;
         if (page >= totalPages) page = totalPages - 1;
 
         String title = MessageUtil.colorize(plugin.getConfig().getString("gui.title", "&c&l红包大厅"));
-        if (totalPages > 1) {
+        if (totalPages > 1 || availableEnvelopes.isEmpty()) {
             title += " &7(" + (page + 1) + "/" + totalPages + ")";
         }
 
         Inventory inventory = Bukkit.createInventory(null, 54, title);
         inventoryEnvelopeMap.clear();
 
-        int startIndex = page * ITEMS_PER_PAGE;
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, availableEnvelopes.size());
+        if (!availableEnvelopes.isEmpty()) {
+            int startIndex = page * ITEMS_PER_PAGE;
+            int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, availableEnvelopes.size());
 
-        for (int i = startIndex; i < endIndex; i++) {
-            RedEnvelope envelope = availableEnvelopes.get(i);
-            ItemStack item = createEnvelopeItem(envelope);
-            int slot = i - startIndex;
-            inventory.setItem(slot, item);
-            inventoryEnvelopeMap.put(slot, envelope.getId());
+            for (int i = startIndex; i < endIndex; i++) {
+                RedEnvelope envelope = availableEnvelopes.get(i);
+                ItemStack item = createEnvelopeItem(envelope);
+                int slot = i - startIndex;
+                inventory.setItem(slot, item);
+                inventoryEnvelopeMap.put(slot, envelope.getId());
+            }
         }
 
         if (totalPages > 1) {
@@ -84,6 +81,10 @@ public class GUIManager implements Listener {
         }
 
         inventory.setItem(49, createInfoItem(availableEnvelopes.size()));
+
+        if (availableEnvelopes.isEmpty()) {
+            inventory.setItem(22, createEmptyItem());
+        }
 
         for (int i = 45; i < 54; i++) {
             if (inventory.getItem(i) == null) {
@@ -116,6 +117,7 @@ public class GUIManager implements Listener {
         for (String line : loreTemplate) {
             lore.add(MessageUtil.colorize(line
                     .replace("{name}", envelope.getName())
+                    .replace("{id}", envelope.getShortId())
                     .replace("{amount}", String.format("%.2f", envelope.getTotalAmount()))
                     .replace("{count}", String.valueOf(envelope.getTotalCount()))
                     .replace("{remaining}", String.valueOf(envelope.getRemainingCount()))
@@ -141,6 +143,18 @@ public class GUIManager implements Listener {
         meta.setDisplayName(MessageUtil.colorize("&6&l红包信息"));
         List<String> lore = new ArrayList<>();
         lore.add(MessageUtil.colorize("&7可领取红包数: &e" + total));
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private ItemStack createEmptyItem() {
+        ItemStack item = new ItemStack(Material.BARRIER);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(MessageUtil.colorize("&c&l暂无红包"));
+        List<String> lore = new ArrayList<>();
+        lore.add(MessageUtil.colorize("&7当前没有可领取的红包"));
+        lore.add(MessageUtil.colorize("&7请稍后再来查看!"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

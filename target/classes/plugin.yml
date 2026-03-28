@@ -1,5 +1,5 @@
 name: SyExtract
-version: '1.0.0'
+version: '1.1.0'
 main: com.shiyuan.syextract.SyExtractPlugin
 api-version: '1.21'
 author: Shiyuan
@@ -8,7 +8,7 @@ softdepend: [Vault]
 commands:
   syextract:
     description: SyExtract main command
-    usage: /syextract <create|open|ban|unban|reload>
+    usage: /syextract <create|open|ban|unban|reload|broadcast|claim>
     aliases: [sye]
     permission: syextract.use
 
@@ -21,6 +21,12 @@ permissions:
     default: true
   syextract.open:
     description: Allows opening red envelope GUI
+    default: true
+  syextract.claim:
+    description: Allows claiming red envelopes
+    default: true
+  syextract.broadcast:
+    description: Allows broadcasting red envelopes
     default: true
   syextract.ban:
     description: Allows banning players from using red envelopes

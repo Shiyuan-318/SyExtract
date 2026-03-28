@@ -14,11 +14,13 @@ public class RedEnvelopeManager {
 
     private final SyExtractPlugin plugin;
     private final Map<UUID, RedEnvelope> envelopes;
+    private final Map<String, RedEnvelope> shortIdMap;
     private final File dataFile;
 
     public RedEnvelopeManager(SyExtractPlugin plugin) {
         this.plugin = plugin;
         this.envelopes = new HashMap<>();
+        this.shortIdMap = new HashMap<>();
         this.dataFile = new File(plugin.getDataFolder(), "envelopes.yml");
     }
 
@@ -26,6 +28,7 @@ public class RedEnvelopeManager {
         long expireHours = plugin.getConfig().getLong("red-envelope.default-expire-hours", 24);
         RedEnvelope envelope = new RedEnvelope(sender, senderName, name, amount, count, expireHours);
         envelopes.put(envelope.getId(), envelope);
+        shortIdMap.put(envelope.getShortId(), envelope);
         saveEnvelopes();
         return envelope;
     }
@@ -33,10 +36,47 @@ public class RedEnvelopeManager {
     public RedEnvelope getEnvelope(UUID id) {
         RedEnvelope envelope = envelopes.get(id);
         if (envelope != null && (envelope.isExpired() || envelope.isFullyClaimed())) {
+            if (envelope.isExpired() && !envelope.isRefunded() && !envelope.isFullyClaimed()) {
+                refundEnvelope(envelope);
+            }
             envelopes.remove(id);
+            shortIdMap.remove(envelope.getShortId());
             return null;
         }
         return envelope;
+    }
+
+    public RedEnvelope getEnvelopeByShortId(String shortId) {
+        RedEnvelope envelope = shortIdMap.get(shortId.toUpperCase());
+        if (envelope != null) {
+            if (envelope.isExpired() || envelope.isFullyClaimed()) {
+                if (envelope.isExpired() && !envelope.isRefunded() && !envelope.isFullyClaimed()) {
+                    refundEnvelope(envelope);
+                }
+                envelopes.remove(envelope.getId());
+                shortIdMap.remove(envelope.getShortId());
+                return null;
+            }
+        }
+        return envelope;
+    }
+
+    public void refundEnvelope(RedEnvelope envelope) {
+        if (envelope.isRefunded()) {
+            return;
+        }
+        
+        double unclaimedAmount = envelope.getUnclaimedAmount();
+        if (unclaimedAmount > 0) {
+            plugin.getEconomyManager().deposit(envelope.getSender(), unclaimedAmount);
+            envelope.setRefunded(true);
+            
+            org.bukkit.entity.Player sender = plugin.getServer().getPlayer(envelope.getSender());
+            if (sender != null && sender.isOnline()) {
+                sender.sendMessage(com.shiyuan.syextract.util.MessageUtil.getMessage("info.refund", 
+                    Map.of("amount", String.format("%.2f", unclaimedAmount), "name", envelope.getName())));
+            }
+        }
     }
 
     public List<RedEnvelope> getAvailableEnvelopes() {
@@ -66,6 +106,24 @@ public class RedEnvelopeManager {
             saveEnvelopes();
             if (envelope.isFullyClaimed()) {
                 envelopes.remove(envelopeId);
+                shortIdMap.remove(envelope.getShortId());
+            }
+        }
+        return amount;
+    }
+
+    public double claimEnvelopeByShortId(String shortId, UUID playerId) {
+        RedEnvelope envelope = getEnvelopeByShortId(shortId);
+        if (envelope == null) {
+            return -1;
+        }
+        
+        double amount = envelope.claim(playerId);
+        if (amount > 0) {
+            saveEnvelopes();
+            if (envelope.isFullyClaimed()) {
+                envelopes.remove(envelope.getId());
+                shortIdMap.remove(envelope.getShortId());
             }
         }
         return amount;
@@ -77,6 +135,10 @@ public class RedEnvelopeManager {
             Map.Entry<UUID, RedEnvelope> entry = iterator.next();
             RedEnvelope envelope = entry.getValue();
             if (envelope.isExpired() || envelope.isFullyClaimed()) {
+                if (envelope.isExpired() && !envelope.isRefunded() && !envelope.isFullyClaimed()) {
+                    refundEnvelope(envelope);
+                }
+                shortIdMap.remove(envelope.getShortId());
                 iterator.remove();
             }
         }
@@ -95,6 +157,7 @@ public class RedEnvelopeManager {
         }
 
         envelopes.clear();
+        shortIdMap.clear();
         
         for (String key : section.getKeys(false)) {
             try {
@@ -108,6 +171,7 @@ public class RedEnvelopeManager {
                 double totalAmount = envSection.getDouble("totalAmount");
                 int totalCount = envSection.getInt("totalCount");
                 long expireTime = envSection.getLong("expireTime");
+                boolean refunded = envSection.getBoolean("refunded", false);
                 
                 if (System.currentTimeMillis() > expireTime) {
                     continue;
@@ -116,6 +180,10 @@ public class RedEnvelopeManager {
                 long expireHours = (expireTime - System.currentTimeMillis()) / (60 * 60 * 1000) + 1;
                 RedEnvelope envelope = new RedEnvelope(sender, senderName, name, totalAmount, totalCount, expireHours);
                 
+                if (refunded) {
+                    envelope.setRefunded(true);
+                }
+                
                 List<String> claimedPlayers = envSection.getStringList("claimedPlayers");
                 for (String playerUuid : claimedPlayers) {
                     envelope.claim(UUID.fromString(playerUuid));
@@ -123,6 +191,7 @@ public class RedEnvelopeManager {
                 
                 if (!envelope.isFullyClaimed() && !envelope.isExpired()) {
                     envelopes.put(id, envelope);
+                    shortIdMap.put(envelope.getShortId(), envelope);
                 }
             } catch (Exception e) {
                 plugin.getLogger().warning("加载红包数据失败: " + key);
@@ -152,6 +221,7 @@ public class RedEnvelopeManager {
                 envSection.set("totalAmount", envelope.getTotalAmount());
                 envSection.set("totalCount", envelope.getTotalCount());
                 envSection.set("expireTime", envelope.getExpireTime());
+                envSection.set("refunded", envelope.isRefunded());
                 
                 List<String> claimedPlayers = new ArrayList<>();
                 for (UUID playerId : envelope.getClaimedPlayers()) {
