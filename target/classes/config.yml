@@ -1,0 +1,78 @@
+# SyExtract Configuration
+# Author: Shiyuan
+# Year: 2026
+
+# 红包设置
+red-envelope:
+  # 红包默认可领取时间（小时）
+  default-expire-hours: 24
+  # 最小红包金额
+  min-amount: 1.0
+  # 最小红包数量
+  min-count: 1
+  # 最大红包数量
+  max-count: 100
+
+# 手续费设置
+fee:
+  # 是否启用手续费
+  enabled: true
+  # 手续费比例 (0.0 - 1.0, 例如 0.05 = 5%)
+  percentage: 0.05
+  # 最低手续费
+  min-fee: 1.0
+
+# GUI设置
+gui:
+  # GUI标题
+  title: "&c&l红包大厅"
+  # 每页显示的红包数量
+  items-per-page: 45
+  # 红包物品材质
+  item-material: "SUNFLOWER"
+  # 红包物品显示名称
+  item-name: "&6&l{sender} &e的红包"
+  # 红包物品Lore
+  item-lore:
+    - "&7红包名称: &f{name}"
+    - "&7总金额: &a{amount}"
+    - "&7总数量: &e{count}"
+    - "&7剩余数量: &b{remaining}"
+    - "&7过期时间: &c{expire}"
+    - ""
+    - "&e点击领取红包!"
+
+# 消息设置
+messages:
+  prefix: "&8[&cSyExtract&8] &r"
+  # 成功消息
+  success:
+    create: "&a成功创建红包! 扣除金额: &e{amount} &a(含手续费: &e{fee}&a)"
+    claim: "&a恭喜! 你领取了 &e{sender} &a的红包, 获得 &6{amount} &a金币!"
+    reload: "&a配置重载成功!"
+    ban: "&a成功封禁玩家 &e{player} &a, 到期时间: &c{expire}"
+    unban: "&a成功解封玩家 &e{player}"
+  # 错误消息
+  error:
+    no-permission: "&c你没有权限执行此操作!"
+    no-vault: "&c未找到Vault插件, 无法使用经济功能!"
+    insufficient-balance: "&c你的余额不足! 需要: &e{amount} &c金币"
+    invalid-amount: "&c无效的金额!"
+    invalid-count: "&c无效的数量! 必须在 &e{min} &c到 &e{max} &c之间"
+    envelope-not-found: "&c红包不存在或已过期!"
+    already-claimed: "&c你已经领取过这个红包了!"
+    no-envelopes: "&c当前没有可领取的红包!"
+    player-not-found: "&c玩家不存在!"
+    banned-create: "&c你已被封禁发放红包权限! 解封时间: &e{expire}"
+    banned-claim: "&c你已被封禁领取红包权限! 解封时间: &e{expire}"
+    invalid-time: "&c无效的时间格式! 请使用: 1h, 1d, 1w 等"
+  # 提示消息
+  info:
+    help:
+      - "&6========== &cSyExtract &6=========="
+      - "&e/sye create <名称> <金额> <数量> &7- 创建红包"
+      - "&e/sye open &7- 打开红包GUI"
+      - "&e/sye ban <玩家> <时间> &7- 封禁玩家"
+      - "&e/sye unban <玩家> &7- 解封玩家"
+      - "&e/sye reload &7- 重载配置"
+      - "&6================================"

@@ -1,0 +1,40 @@
+name: SyExtract
+version: '1.0.0'
+main: com.shiyuan.syextract.SyExtractPlugin
+api-version: '1.21'
+author: Shiyuan
+softdepend: [Vault]
+
+commands:
+  syextract:
+    description: SyExtract main command
+    usage: /syextract <create|open|ban|unban|reload>
+    aliases: [sye]
+    permission: syextract.use
+
+permissions:
+  syextract.use:
+    description: Allows basic use of SyExtract
+    default: true
+  syextract.create:
+    description: Allows creating red envelopes
+    default: true
+  syextract.open:
+    description: Allows opening red envelope GUI
+    default: true
+  syextract.ban:
+    description: Allows banning players from using red envelopes
+    default: op
+  syextract.unban:
+    description: Allows unbanning players
+    default: op
+  syextract.reload:
+    description: Allows reloading plugin configuration
+    default: op
+  syextract.admin:
+    description: All admin permissions
+    default: op
+    children:
+      syextract.ban: true
+      syextract.unban: true
+      syextract.reload: true
