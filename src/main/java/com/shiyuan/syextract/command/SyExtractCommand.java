@@ -138,7 +138,31 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(MessageUtil.getMessage("success.create", 
             Map.of("amount", String.format("%.2f", amount), 
                    "fee", String.format("%.2f", fee),
+                   "total", String.format("%.2f", totalCost),
                    "id", envelope.getShortId())));
+
+        broadcastEnvelope(envelope);
+    }
+
+    private void broadcastEnvelope(RedEnvelope envelope) {
+        String broadcastFormat = plugin.getConfig().getString("messages.broadcast.format",
+            "<gold><bold>🧧 红包来袭!</bold></gold> <yellow>{sender}</yellow> <gray>发放了一个红包</gray> <gold><bold>[{name}]</bold></gold> <gray>总金额: </gray><green>{amount}</green> <gray>金币</gray>");
+
+        String clickText = plugin.getConfig().getString("messages.broadcast.click-text", "<green><bold>[立即领取]</bold></green>");
+        String hoverText = plugin.getConfig().getString("messages.broadcast.hover-text", "<yellow>点击领取红包!</yellow>");
+
+        String message = broadcastFormat
+            .replace("{sender}", envelope.getSenderName())
+            .replace("{name}", envelope.getName())
+            .replace("{amount}", String.format("%.2f", envelope.getTotalAmount()))
+            .replace("{id}", envelope.getShortId());
+
+        Component broadcastMessage = MiniMessage.miniMessage().deserialize(message);
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendMessage(broadcastMessage);
+            player.sendMessage(createClickableMessage(clickText, hoverText, "/sye claim " + envelope.getShortId()));
+        }
     }
 
     private void handleOpen(CommandSender sender) {

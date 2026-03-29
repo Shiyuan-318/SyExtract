@@ -207,12 +207,12 @@ public class GUIManager implements Listener {
             return;
         }
 
+        RedEnvelope envelope = plugin.getRedEnvelopeManager().getEnvelope(envelopeId);
+        String senderName = envelope != null ? envelope.getSenderName() : "Unknown";
+        
         double amount = plugin.getRedEnvelopeManager().claimEnvelope(envelopeId, player.getUniqueId());
         
         if (amount > 0) {
-            RedEnvelope envelope = plugin.getRedEnvelopeManager().getEnvelope(envelopeId);
-            String senderName = envelope != null ? envelope.getSenderName() : "Unknown";
-            
             plugin.getEconomyManager().deposit(player.getUniqueId(), amount);
             
             player.sendMessage(MessageUtil.getMessage("success.claim", 
