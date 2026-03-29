@@ -4,7 +4,10 @@ import java.util.*;
 
 public class RedEnvelope {
 
+    private static int nextId = 1;
+
     private final UUID id;
+    private final int numericId;
     private final String shortId;
     private final UUID sender;
     private final String senderName;
@@ -20,7 +23,8 @@ public class RedEnvelope {
 
     public RedEnvelope(UUID sender, String senderName, String name, double totalAmount, int totalCount, long expireHours) {
         this.id = UUID.randomUUID();
-        this.shortId = generateShortId();
+        this.numericId = nextId++;
+        this.shortId = String.valueOf(this.numericId);
         this.sender = sender;
         this.senderName = senderName;
         this.name = name;
@@ -34,14 +38,16 @@ public class RedEnvelope {
         this.refunded = false;
     }
 
-    private String generateShortId() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        StringBuilder sb = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < 6; i++) {
-            sb.append(chars.charAt(random.nextInt(chars.length())));
-        }
-        return sb.toString();
+    public static void setNextId(int id) {
+        nextId = id;
+    }
+
+    public static int getNextId() {
+        return nextId;
+    }
+
+    public int getNumericId() {
+        return numericId;
     }
 
     private List<Double> generateRandomAmounts(double total, int count) {

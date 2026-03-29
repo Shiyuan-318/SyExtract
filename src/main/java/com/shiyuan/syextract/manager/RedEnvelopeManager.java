@@ -151,14 +151,16 @@ public class RedEnvelopeManager {
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(dataFile);
         ConfigurationSection section = config.getConfigurationSection("envelopes");
-        
+
         if (section == null) {
             return;
         }
 
         envelopes.clear();
         shortIdMap.clear();
-        
+
+        int maxId = 0;
+
         for (String key : section.getKeys(false)) {
             try {
                 ConfigurationSection envSection = section.getConfigurationSection(key);
@@ -172,30 +174,39 @@ public class RedEnvelopeManager {
                 int totalCount = envSection.getInt("totalCount");
                 long expireTime = envSection.getLong("expireTime");
                 boolean refunded = envSection.getBoolean("refunded", false);
-                
+                int numericId = envSection.getInt("numericId", 0);
+
                 if (System.currentTimeMillis() > expireTime) {
                     continue;
                 }
 
                 long expireHours = (expireTime - System.currentTimeMillis()) / (60 * 60 * 1000) + 1;
                 RedEnvelope envelope = new RedEnvelope(sender, senderName, name, totalAmount, totalCount, expireHours);
-                
+
                 if (refunded) {
                     envelope.setRefunded(true);
                 }
-                
+
                 List<String> claimedPlayers = envSection.getStringList("claimedPlayers");
                 for (String playerUuid : claimedPlayers) {
                     envelope.claim(UUID.fromString(playerUuid));
                 }
-                
+
                 if (!envelope.isFullyClaimed() && !envelope.isExpired()) {
                     envelopes.put(id, envelope);
                     shortIdMap.put(envelope.getShortId(), envelope);
+                    if (numericId > maxId) {
+                        maxId = numericId;
+                    }
                 }
             } catch (Exception e) {
                 plugin.getLogger().warning("加载红包数据失败: " + key);
             }
+        }
+
+        // 设置下一个ID为最大ID+1
+        if (maxId > 0) {
+            RedEnvelope.setNextId(maxId + 1);
         }
     }
 
@@ -222,6 +233,7 @@ public class RedEnvelopeManager {
                 envSection.set("totalCount", envelope.getTotalCount());
                 envSection.set("expireTime", envelope.getExpireTime());
                 envSection.set("refunded", envelope.isRefunded());
+                envSection.set("numericId", envelope.getNumericId());
                 
                 List<String> claimedPlayers = new ArrayList<>();
                 for (UUID playerId : envelope.getClaimedPlayers()) {

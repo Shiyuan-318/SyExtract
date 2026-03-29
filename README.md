@@ -5,7 +5,7 @@ A red envelope plugin for Minecraft Purpur 1.21.1 with Vault economy support.
 ## Features
 
 - Create red envelopes (set name, amount, quantity)
-- **Each red envelope has a unique 6-character ID (e.g., A3B7K9)**
+- **Each red envelope has a unique numeric ID starting from 1 (e.g., 1, 2, 3)**
 - GUI interface for viewing and claiming red envelopes
 - **GUI can be opened even when no red envelopes are available**
 - **Broadcast red envelopes to all players with one click**
@@ -139,16 +139,16 @@ The plugin generates the following data files in the `plugins/SyExtract/` direct
 
 3. **Broadcast a red envelope**
    ```
-   /sye broadcast A3B7K9
+   /sye broadcast 1
    ```
-   Broadcast the red envelope with ID "A3B7K9" to all online players.
+   Broadcast the red envelope with ID "1" to all online players.
    Players can click the "[Claim Now]" button in the chat to claim it.
 
 4. **Claim a specific red envelope**
    ```
-   /sye claim A3B7K9
+   /sye claim 1
    ```
-   Directly claim the red envelope with ID "A3B7K9".
+   Directly claim the red envelope with ID "1".
 
 5. **Ban a player**
    ```
@@ -167,9 +167,14 @@ The plugin generates the following data files in the `plugins/SyExtract/` direct
 2. Red envelopes use a random distribution algorithm; each share amount is random
 3. **Expired unclaimed red envelopes will be automatically refunded to the sender**
 4. Each player can only claim the same red envelope once
-5. **Each red envelope has a unique 6-character ID for easy sharing and claiming**
+5. **Each red envelope has a unique numeric ID for easy sharing and claiming**
 
 ## Changelog
+
+### v1.2.0
+- Fixed broadcast message not found issue (success.broadcast)
+- Fixed clickable claim button in broadcast messages
+- Changed red envelope ID from random 6-character to sequential numeric ID starting from 1
 
 ### v1.1.0
 - Added unique 6-character ID for each red envelope
