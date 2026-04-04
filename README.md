@@ -1,6 +1,6 @@
 # SyExtract
 
-A red envelope plugin for Minecraft Purpur 1.21.1 with Vault economy support.
+A red envelope plugin for Minecraft Paper/Purpur 1.21 with Vault economy support.
 
 ## Features
 
@@ -10,6 +10,7 @@ A red envelope plugin for Minecraft Purpur 1.21.1 with Vault economy support.
 - **GUI can be opened even when no red envelopes are available**
 - **Broadcast red envelopes to all players with one click**
 - **Unclaimed amounts are automatically refunded when red envelopes expire**
+- **Multi-language support (简体中文/English)**
 - Vault economy system support
 - Configurable fee system
 - Player ban system (restrict sending/claiming red envelopes)
@@ -18,23 +19,24 @@ A red envelope plugin for Minecraft Purpur 1.21.1 with Vault economy support.
 
 ## Requirements
 
-- Minecraft Server: Purpur 1.21.1
+- Minecraft Server: Paper/Purpur 1.21
 - Java: 17 or higher
 - Dependencies: Vault + any economy plugin (e.g., EssentialsX)
 
 ## Commands
 
-| Command | Permission | Description |
-|---------|------------|-------------|
-| `/sye create <name> <amount> <count>` | syextract.create | Create a red envelope |
-| `/sye open` | syextract.open | Open the red envelope GUI |
-| `/sye broadcast <id>` | syextract.broadcast | Broadcast a red envelope to all players |
-| `/sye claim <id>` | syextract.claim | Claim a specific red envelope by ID |
-| `/sye ban <player> <time>` | syextract.ban | Ban a player |
-| `/sye unban <player>` | syextract.unban | Unban a player |
-| `/sye reload` | syextract.reload | Reload configuration |
+| Command                               | Permission          | Description                             |
+| ------------------------------------- | ------------------- | --------------------------------------- |
+| `/sye create <name> <amount> <count>` | syextract.create    | Create a red envelope                   |
+| `/sye open`                           | syextract.open      | Open the red envelope GUI               |
+| `/sye broadcast <id>`                 | syextract.broadcast | Broadcast a red envelope to all players |
+| `/sye claim <id>`                     | syextract.claim     | Claim a specific red envelope by ID     |
+| `/sye ban <player> <time>`            | syextract.ban       | Ban a player                            |
+| `/sye unban <player>`                 | syextract.unban     | Unban a player                          |
+| `/sye reload`                         | syextract.reload    | Reload configuration                    |
 
 ### Command Aliases
+
 - `create` → `c`
 - `open` → `o`
 - `broadcast` → `br`
@@ -44,7 +46,9 @@ A red envelope plugin for Minecraft Purpur 1.21.1 with Vault economy support.
 - `reload` → `r`
 
 ### Time Format
+
 Ban duration supports the following formats:
+
 - `1h` - 1 hour
 - `1d` - 1 day
 - `1w` - 1 week
@@ -52,23 +56,27 @@ Ban duration supports the following formats:
 
 ## Permissions
 
-| Permission | Default | Description |
-|------------|---------|-------------|
-| syextract.use | true | Basic usage permission |
-| syextract.create | true | Create red envelope permission |
-| syextract.open | true | Open GUI permission |
-| syextract.claim | true | Claim red envelope permission |
-| syextract.broadcast | true | Broadcast red envelope permission |
-| syextract.ban | op | Ban player permission |
-| syextract.unban | op | Unban player permission |
-| syextract.reload | op | Reload configuration permission |
-| syextract.admin | op | All admin permissions |
+| Permission          | Default | Description                       |
+| ------------------- | ------- | --------------------------------- |
+| syextract.use       | true    | Basic usage permission            |
+| syextract.create    | true    | Create red envelope permission    |
+| syextract.open      | true    | Open GUI permission               |
+| syextract.claim     | true    | Claim red envelope permission     |
+| syextract.broadcast | true    | Broadcast red envelope permission |
+| syextract.ban       | op      | Ban player permission             |
+| syextract.unban     | op      | Unban player permission           |
+| syextract.reload    | op      | Reload configuration permission   |
+| syextract.admin     | op      | All admin permissions             |
 
 ## Configuration
 
 ### config.yml
 
 ```yaml
+# Language Settings
+# Available values: zh (简体中文), en (English)
+language: zh
+
 # Red envelope settings
 red-envelope:
   # Default claim duration (hours)
@@ -91,36 +99,59 @@ fee:
 
 # GUI settings
 gui:
-  # GUI title
-  title: "&c&lRed Envelope Hall"
   # Red envelope item material
   item-material: "SUNFLOWER"
-  # Red envelope item display name
-  item-name: "&6&l{sender}&e's Red Envelope"
-  # Red envelope item lore
-  item-lore:
-    - "&7Name: &f{name}"
-    - "&7ID: &e{id}"
-    - "&7Total: &a{amount}"
-    - "&7Count: &e{count}"
-    - "&7Remaining: &b{remaining}"
-    - "&7Expires: &c{expire}"
-    - ""
-    - "&eClick to claim!"
 
 # Broadcast message settings
-messages:
-  broadcast:
-    format: "&6&l🧧 Red Envelope! &e{sender} &7sent &6&l[{name}] &7Total: &a{amount} &7coins"
-    click-text: "&a&l[Claim Now]"
-    hover-text: "&eClick to claim!"
+broadcast:
+  # Notification when red envelope is fully claimed
+  envelope-completed: "&6&l🎉 Red envelope &e{name} &7has been fully claimed! &6{player} &7got the highest amount: &e{amount} &7coins!"
+```
+
+### Language Files
+
+The plugin supports multi-language through language files located in `plugins/SyExtract/lang/`:
+
+- `zh.yml` - 简体中文 (default)
+- `en.yml` - English
+
+You can customize all messages in these files. To switch language, change the `language` option in `config.yml`.
+
+#### Language File Structure
+
+```yaml
+# Message prefix
+prefix: "&8[&cSyExtract&8] &r"
+
+# Success messages
+success:
+  create: "&aSuccessfully created red envelope! ID: &e{id}"
+  claim: "&aYou claimed the red envelope and received &6{amount} &acoins!"
+  # ... more messages
+
+# Error messages
+error:
+  no-permission: "&cYou don't have permission!"
+  # ... more messages
+
+# GUI texts
+gui:
+  title: "&c&lRed Envelope Hall"
+  # ... more texts
+
+# Broadcast messages
+broadcast:
+  format: "&6&l🧧 Red Envelope! &e{sender} &7sent &6&l[{name}]"
+  click-text: "&a&l[Claim Now]"
 ```
 
 ## Data Storage
 
 The plugin generates the following data files in the `plugins/SyExtract/` directory:
+
 - `envelopes.yml` - Red envelope data
 - `bans.yml` - Ban data
+- `lang/` - Language files (auto-generated)
 
 ## Usage Examples
 
@@ -168,16 +199,32 @@ The plugin generates the following data files in the `plugins/SyExtract/` direct
 3. **Expired unclaimed red envelopes will be automatically refunded to the sender**
 4. Each player can only claim the same red envelope once
 5. **Each red envelope has a unique numeric ID for easy sharing and claiming**
+6. **Multi-language support allows you to customize all plugin messages**
 
 ## Changelog
 
+### v1.4.0
+
+- Added multi-language support (简体中文/English)
+- Language files are now stored in `lang/` folder
+- All messages can be customized through language files
+- Added `language` option in config.yml
+
+### v1.3.0
+
+- Added notification when red envelope is fully claimed
+- Shows the luckiest player (hand king) who got the highest amount
+- Added `broadcast.envelope-completed` message configuration
+
 ### v1.2.0
+
 - Fixed broadcast message not found issue (success.broadcast)
 - Fixed clickable claim button in broadcast messages
 - Changed red envelope ID from random 6-character to sequential numeric ID starting from 1
 
 ### v1.1.0
-- Added unique 6-character ID for each red envelope
+
+- Added unique ID for each red envelope
 - Added automatic refund for expired unclaimed red envelopes
 - Added `/sye broadcast` command to broadcast red envelopes
 - Added `/sye claim` command to claim by ID
@@ -185,4 +232,10 @@ The plugin generates the following data files in the `plugins/SyExtract/` direct
 - Updated to Java 17 compatibility
 
 ### v1.0.0
+
 - Initial release
+
+## Author
+
+- **Author**: Shiyuan
+- **Year**: 2026

@@ -5,11 +5,6 @@ import com.shiyuan.syextract.model.PlayerBan;
 import com.shiyuan.syextract.model.RedEnvelope;
 import com.shiyuan.syextract.util.MessageUtil;
 import com.shiyuan.syextract.util.TimeUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -72,7 +67,7 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 4) {
-            sender.sendMessage(MessageUtil.colorize("&c用法: /sye create <名称> <金额> <数量>"));
+            sender.sendMessage(MessageUtil.getMessage("command.usage-create"));
             return;
         }
 
@@ -145,11 +140,11 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
     }
 
     private void broadcastEnvelope(RedEnvelope envelope) {
-        String broadcastFormat = plugin.getConfig().getString("messages.broadcast.format",
-            "<gold><bold>🧧 红包来袭!</bold></gold> <yellow>{sender}</yellow> <gray>发放了一个红包</gray> <gold><bold>[{name}]</bold></gold> <gray>总金额: </gray><green>{amount}</green> <gray>金币</gray>");
+        String broadcastFormat = MessageUtil.getRawMessage("broadcast.format", 
+            "&6&l🧧 Red Envelope! &e{sender} &7sent &6&l[{name}] &7Total: &a{amount} &7coins");
 
-        String clickText = plugin.getConfig().getString("messages.broadcast.click-text", "<green><bold>[立即领取]</bold></green>");
-        String hoverText = plugin.getConfig().getString("messages.broadcast.hover-text", "<yellow>点击领取红包!</yellow>");
+        String clickText = MessageUtil.getRawMessage("broadcast.click-text", "&a&l[Claim Now]");
+        String hoverText = MessageUtil.getRawMessage("broadcast.hover-text", "&eClick to claim!");
 
         String message = broadcastFormat
             .replace("{sender}", envelope.getSenderName())
@@ -157,11 +152,9 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
             .replace("{amount}", String.format("%.2f", envelope.getTotalAmount()))
             .replace("{id}", envelope.getShortId());
 
-        Component broadcastMessage = MiniMessage.miniMessage().deserialize(message);
-
         for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendMessage(broadcastMessage);
-            player.sendMessage(createClickableMessage(clickText, hoverText, "/sye claim " + envelope.getShortId()));
+            player.sendMessage(MessageUtil.colorize(message));
+            player.sendMessage(MessageUtil.colorize(clickText) + " " + MessageUtil.colorize("&7(Click to run: &e/sye claim " + envelope.getShortId() + "&7)"));
         }
     }
 
@@ -186,8 +179,8 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 3) {
-            sender.sendMessage(MessageUtil.colorize("&c用法: /sye ban <玩家名> <时间>"));
-            sender.sendMessage(MessageUtil.colorize("&7时间格式: 1h=1小时, 1d=1天, 1w=1周"));
+            sender.sendMessage(MessageUtil.getMessage("command.usage-ban"));
+            sender.sendMessage(MessageUtil.getMessage("command.usage-ban-time"));
             return;
         }
 
@@ -221,7 +214,7 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2) {
-            sender.sendMessage(MessageUtil.colorize("&c用法: /sye unban <玩家名>"));
+            sender.sendMessage(MessageUtil.getMessage("command.usage-unban"));
             return;
         }
 
@@ -255,7 +248,7 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2) {
-            sender.sendMessage(MessageUtil.colorize("&c用法: /sye broadcast <红包ID>"));
+            sender.sendMessage(MessageUtil.getMessage("command.usage-broadcast"));
             return;
         }
 
@@ -267,11 +260,11 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        String broadcastFormat = plugin.getConfig().getString("messages.broadcast.format",
-            "<gold><bold>🧧 红包来袭!</bold></gold> <yellow>{sender}</yellow> <gray>发放了一个红包</gray> <gold><bold>[{name}]</bold></gold> <gray>总金额: </gray><green>{amount}</green> <gray>金币</gray>");
+        String broadcastFormat = MessageUtil.getRawMessage("broadcast.format", 
+            "&6&l🧧 Red Envelope! &e{sender} &7sent &6&l[{name}] &7Total: &a{amount} &7coins");
 
-        String clickText = plugin.getConfig().getString("messages.broadcast.click-text", "<green><bold>[立即领取]</bold></green>");
-        String hoverText = plugin.getConfig().getString("messages.broadcast.hover-text", "<yellow>点击领取红包!</yellow>");
+        String clickText = MessageUtil.getRawMessage("broadcast.click-text", "&a&l[Claim Now]");
+        String hoverText = MessageUtil.getRawMessage("broadcast.hover-text", "&eClick to claim!");
 
         String message = broadcastFormat
             .replace("{sender}", envelope.getSenderName())
@@ -279,21 +272,13 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
             .replace("{amount}", String.format("%.2f", envelope.getTotalAmount()))
             .replace("{id}", envelope.getShortId());
 
-        Component broadcastMessage = MiniMessage.miniMessage().deserialize(message);
-
         for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendMessage(broadcastMessage);
-            player.sendMessage(createClickableMessage(clickText, hoverText, "/sye claim " + envelope.getShortId()));
+            player.sendMessage(MessageUtil.colorize(message));
+            player.sendMessage(MessageUtil.colorize(clickText) + " " + MessageUtil.colorize("&7(Click to run: &e/sye claim " + envelope.getShortId() + "&7)"));
         }
 
         sender.sendMessage(MessageUtil.getMessage("success.broadcast",
             Map.of("id", envelope.getShortId())));
-    }
-
-    private Component createClickableMessage(String text, String hover, String command) {
-        return MiniMessage.miniMessage().deserialize(text)
-            .clickEvent(ClickEvent.runCommand(command))
-            .hoverEvent(HoverEvent.showText(MiniMessage.miniMessage().deserialize(hover)));
     }
 
     private void handleClaim(CommandSender sender, String[] args) {
@@ -315,7 +300,7 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2) {
-            sender.sendMessage(MessageUtil.colorize("&c用法: /sye claim <红包ID>"));
+            sender.sendMessage(MessageUtil.getMessage("command.usage-claim"));
             return;
         }
 
@@ -408,3 +393,4 @@ public class SyExtractCommand implements CommandExecutor, TabCompleter {
         return completions;
     }
 }
+

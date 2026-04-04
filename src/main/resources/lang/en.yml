@@ -1,0 +1,84 @@
+# SyExtract English Language File
+# Author: Shiyuan
+# Year: 2026
+
+# Message prefix
+prefix: "&8[&cSyExtract&8] &r"
+
+# Success messages
+success:
+  create: "&aSuccessfully created red envelope! ID: &e{id} &aDeducted: &e{amount} &a(Fee: &e{fee}&a)"
+  claim: "&aCongratulations! You claimed &e{sender}&a's red envelope and received &6{amount} &acoins!"
+  reload: "&aConfiguration reloaded successfully!"
+  ban: "&aSuccessfully banned player &e{player}&a, expires: &c{expire}"
+  unban: "&aSuccessfully unbanned player &e{player}"
+  broadcast: "&aSuccessfully broadcast red envelope &e{id}"
+
+# Error messages
+error:
+  no-permission: "&cYou don't have permission to do this!"
+  no-vault: "&cVault plugin not found, economy features unavailable!"
+  insufficient-balance: "&cInsufficient balance! Required: &e{amount} &ccoins"
+  invalid-amount: "&cInvalid amount!"
+  invalid-count: "&cInvalid count! Must be between &e{min} &cand &e{max}"
+  envelope-not-found: "&cRed envelope not found or expired!"
+  already-claimed: "&cYou have already claimed this red envelope!"
+  no-envelopes: "&cNo red envelopes available!"
+  player-not-found: "&cPlayer not found!"
+  banned-create: "&cYou are banned from creating red envelopes! Expires: &e{expire}"
+  banned-claim: "&cYou are banned from claiming red envelopes! Expires: &e{expire}"
+  invalid-time: "&cInvalid time format! Use: 1h, 1d, 1w, etc."
+  invalid-id: "&cInvalid red envelope ID!"
+
+# Info messages
+info:
+  refund: "&aYour red envelope &e{name} &ahas expired, unclaimed &6{amount} &acoins have been refunded!"
+  no-envelopes-available: "&7No red envelopes available currently"
+  help:
+    - "&6========== &cSyExtract &6=========="
+    - "&e/sye create <name> <amount> <count> &7- Create a red envelope"
+    - "&e/sye open &7- Open red envelope GUI"
+    - "&e/sye broadcast <id> &7- Broadcast a red envelope"
+    - "&e/sye claim <id> &7- Claim a specific red envelope"
+    - "&e/sye ban <player> <time> &7- Ban a player"
+    - "&e/sye unban <player> &7- Unban a player"
+    - "&e/sye reload &7- Reload configuration"
+    - "&6================================"
+
+# GUI texts
+gui:
+  title: "&c&lRed Envelope Hall"
+  empty-title: "&c&lNo Red Envelopes"
+  empty-lore:
+    - "&7No red envelopes available"
+    - "&7Please check back later!"
+  info-name: "&6&lRed Envelope Info"
+  info-lore: "&7Available: &e{count}"
+  previous-page: "&ePrevious Page"
+  next-page: "&eNext Page"
+  envelope-name: "&6&l{sender}&e's Red Envelope"
+  envelope-lore:
+    - "&7Name: &f{name}"
+    - "&7ID: &e{id}"
+    - "&7Total: &a{amount}"
+    - "&7Count: &e{count}"
+    - "&7Remaining: &b{remaining}"
+    - "&7Expires: &c{expire}"
+    - ""
+    - "&eClick to claim!"
+
+# Broadcast messages
+broadcast:
+  format: "&6&l🧧 Red Envelope! &e{sender} &7sent &6&l[{name}] &7Total: &a{amount} &7coins"
+  click-text: "&a&l[Claim Now]"
+  hover-text: "&eClick to claim!"
+  envelope-completed: "&6&l🎉 Red Envelope Alert &r&7The red envelope &e{name} &7has been fully claimed! &6{player} &7got the biggest share of &e{amount} &7coins!"
+
+# Command usage
+command:
+  usage-create: "&cUsage: /sye create <name> <amount> <count>"
+  usage-ban: "&cUsage: /sye ban <player> <time>"
+  usage-ban-time: "&7Time format: 1h=1 hour, 1d=1 day, 1w=1 week"
+  usage-unban: "&cUsage: /sye unban <player>"
+  usage-broadcast: "&cUsage: /sye broadcast <id>"
+  usage-claim: "&cUsage: /sye claim <id>"

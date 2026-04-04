@@ -18,6 +18,7 @@ public class RedEnvelope {
     private final long expireTime;
     private final List<Double> amounts;
     private final Set<UUID> claimedPlayers;
+    private final Map<UUID, Double> claimedAmounts;
     private int remainingCount;
     private boolean refunded;
 
@@ -34,6 +35,7 @@ public class RedEnvelope {
         this.expireTime = this.createTime + (expireHours * 60 * 60 * 1000);
         this.remainingCount = totalCount;
         this.claimedPlayers = new HashSet<>();
+        this.claimedAmounts = new HashMap<>();
         this.amounts = generateRandomAmounts(totalAmount, totalCount);
         this.refunded = false;
     }
@@ -74,12 +76,14 @@ public class RedEnvelope {
         if (isExpired() || remainingCount <= 0 || claimedPlayers.contains(playerId)) {
             return -1;
         }
-        
+
         claimedPlayers.add(playerId);
         remainingCount--;
-        
+
         int index = totalCount - remainingCount - 1;
-        return amounts.get(index);
+        double amount = amounts.get(index);
+        claimedAmounts.put(playerId, amount);
+        return amount;
     }
 
     public boolean hasClaimed(UUID playerId) {
@@ -157,5 +161,49 @@ public class RedEnvelope {
 
     public Set<UUID> getClaimedPlayers() {
         return new HashSet<>(claimedPlayers);
+    }
+
+    public Map<UUID, Double> getClaimedAmounts() {
+        return new HashMap<>(claimedAmounts);
+    }
+
+    public LuckiestPlayerInfo getLuckiestPlayer() {
+        if (claimedAmounts.isEmpty()) {
+            return null;
+        }
+
+        UUID luckiestPlayerId = null;
+        double maxAmount = 0;
+
+        for (Map.Entry<UUID, Double> entry : claimedAmounts.entrySet()) {
+            if (entry.getValue() > maxAmount) {
+                maxAmount = entry.getValue();
+                luckiestPlayerId = entry.getKey();
+            }
+        }
+
+        if (luckiestPlayerId == null) {
+            return null;
+        }
+
+        return new LuckiestPlayerInfo(luckiestPlayerId, maxAmount);
+    }
+
+    public static class LuckiestPlayerInfo {
+        private final UUID playerId;
+        private final double amount;
+
+        public LuckiestPlayerInfo(UUID playerId, double amount) {
+            this.playerId = playerId;
+            this.amount = amount;
+        }
+
+        public UUID getPlayerId() {
+            return playerId;
+        }
+
+        public double getAmount() {
+            return amount;
+        }
     }
 }

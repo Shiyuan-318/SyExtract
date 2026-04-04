@@ -107,6 +107,7 @@ public class RedEnvelopeManager {
             if (envelope.isFullyClaimed()) {
                 envelopes.remove(envelopeId);
                 shortIdMap.remove(envelope.getShortId());
+                broadcastEnvelopeCompleted(envelope);
             }
         }
         return amount;
@@ -117,16 +118,46 @@ public class RedEnvelopeManager {
         if (envelope == null) {
             return -1;
         }
-        
+
         double amount = envelope.claim(playerId);
         if (amount > 0) {
             saveEnvelopes();
             if (envelope.isFullyClaimed()) {
                 envelopes.remove(envelope.getId());
                 shortIdMap.remove(envelope.getShortId());
+                broadcastEnvelopeCompleted(envelope);
             }
         }
         return amount;
+    }
+
+    private void broadcastEnvelopeCompleted(RedEnvelope envelope) {
+        RedEnvelope.LuckiestPlayerInfo luckiest = envelope.getLuckiestPlayer();
+        if (luckiest == null) {
+            return;
+        }
+
+        String luckiestPlayerName = getPlayerName(luckiest.getPlayerId());
+        String message = com.shiyuan.syextract.util.MessageUtil.getMessage("broadcast.envelope-completed",
+            Map.of("name", envelope.getName(),
+                   "player", luckiestPlayerName,
+                   "amount", String.format("%.2f", luckiest.getAmount())),
+            "&6&l🎉 红包通知 &r&7标题为 &e{name} &7的红包被领完了，&6{player} &7是手气王，领到了 &e{amount} &7金币！");
+
+        for (org.bukkit.entity.Player player : plugin.getServer().getOnlinePlayers()) {
+            player.sendMessage(message);
+        }
+    }
+
+    private String getPlayerName(UUID playerId) {
+        org.bukkit.entity.Player player = plugin.getServer().getPlayer(playerId);
+        if (player != null && player.isOnline()) {
+            return player.getName();
+        }
+
+        org.bukkit.OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(playerId);
+        String name = offlinePlayer.getName();
+        return name != null ? name : "Unknown";
     }
 
     public void cleanupExpiredEnvelopes() {

@@ -4,6 +4,7 @@ import com.shiyuan.syextract.command.SyExtractCommand;
 import com.shiyuan.syextract.gui.GUIManager;
 import com.shiyuan.syextract.manager.BanManager;
 import com.shiyuan.syextract.manager.EconomyManager;
+import com.shiyuan.syextract.manager.LanguageManager;
 import com.shiyuan.syextract.manager.RedEnvelopeManager;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -16,6 +17,7 @@ public class SyExtractPlugin extends JavaPlugin {
     private RedEnvelopeManager redEnvelopeManager;
     private BanManager banManager;
     private GUIManager guiManager;
+    private LanguageManager languageManager;
 
     @Override
     public void onEnable() {
@@ -24,8 +26,11 @@ public class SyExtractPlugin extends JavaPlugin {
         saveDefaultConfig();
         reloadConfig();
         
+        // 初始化语言管理器
+        this.languageManager = new LanguageManager(this);
+        
         if (!setupEconomy()) {
-            getLogger().severe("未找到Vault插件! 插件将禁用...");
+            getLogger().severe(languageManager.getRawMessage("error.no-vault", "Vault plugin not found!"));
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -43,9 +48,9 @@ public class SyExtractPlugin extends JavaPlugin {
         redEnvelopeManager.loadEnvelopes();
         banManager.loadBans();
         
-        getLogger().info("SyExtract 插件已启用!");
-        getLogger().info("作者: Shiyuan");
-        getLogger().info("年份: 2026");
+        getLogger().info("SyExtract Plugin Enabled!");
+        getLogger().info("Author: Shiyuan");
+        getLogger().info("Language: " + languageManager.getCurrentLanguage());
     }
 
     @Override
@@ -56,7 +61,7 @@ public class SyExtractPlugin extends JavaPlugin {
         if (banManager != null) {
             banManager.saveBans();
         }
-        getLogger().info("SyExtract 插件已禁用!");
+        getLogger().info("SyExtract Plugin Disabled!");
     }
 
     private boolean setupEconomy() {
@@ -90,8 +95,13 @@ public class SyExtractPlugin extends JavaPlugin {
         return guiManager;
     }
 
+    public LanguageManager getLanguageManager() {
+        return languageManager;
+    }
+
     public void reloadPlugin() {
         reloadConfig();
+        languageManager.reloadLanguage();
         redEnvelopeManager.loadEnvelopes();
         banManager.loadBans();
     }

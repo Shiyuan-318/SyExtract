@@ -50,7 +50,7 @@ public class GUIManager implements Listener {
         if (page < 0) page = 0;
         if (page >= totalPages) page = totalPages - 1;
 
-        String title = MessageUtil.colorize(plugin.getConfig().getString("gui.title", "&c&l红包大厅"));
+        String title = MessageUtil.colorize(MessageUtil.getRawMessage("gui.title", "&c&lRed Envelope Hall"));
         if (totalPages > 1 || availableEnvelopes.isEmpty()) {
             title += " &7(" + (page + 1) + "/" + totalPages + ")";
         }
@@ -73,10 +73,10 @@ public class GUIManager implements Listener {
 
         if (totalPages > 1) {
             if (page > 0) {
-                inventory.setItem(45, createNavigationItem(Material.ARROW, "&e上一页"));
+                inventory.setItem(45, createNavigationItem(Material.ARROW, MessageUtil.getRawMessage("gui.previous-page", "&ePrevious Page")));
             }
             if (page < totalPages - 1) {
-                inventory.setItem(53, createNavigationItem(Material.ARROW, "&e下一页"));
+                inventory.setItem(53, createNavigationItem(Material.ARROW, MessageUtil.getRawMessage("gui.next-page", "&eNext Page")));
             }
         }
 
@@ -107,21 +107,33 @@ public class GUIManager implements Listener {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
 
-        String name = plugin.getConfig().getString("gui.item-name", "&6&l{sender} &e的红包")
-                .replace("{sender}", envelope.getSenderName());
+        String nameTemplate = MessageUtil.getRawMessage("gui.envelope-name", "&6&l{sender}&e's Red Envelope");
+        String name = nameTemplate.replace("{sender}", envelope.getSenderName());
         meta.setDisplayName(MessageUtil.colorize(name));
 
         List<String> lore = new ArrayList<>();
-        List<String> loreTemplate = plugin.getConfig().getStringList("gui.item-lore");
+        List<String> loreTemplate = MessageUtil.getRawMessageList("gui.envelope-lore");
         
-        for (String line : loreTemplate) {
-            lore.add(MessageUtil.colorize(line
-                    .replace("{name}", envelope.getName())
-                    .replace("{id}", envelope.getShortId())
-                    .replace("{amount}", String.format("%.2f", envelope.getTotalAmount()))
-                    .replace("{count}", String.valueOf(envelope.getTotalCount()))
-                    .replace("{remaining}", String.valueOf(envelope.getRemainingCount()))
-                    .replace("{expire}", DATE_FORMAT.format(new Date(envelope.getExpireTime())))));
+        if (loreTemplate.isEmpty()) {
+            // 默认lore
+            lore.add(MessageUtil.colorize("&7Name: &f" + envelope.getName()));
+            lore.add(MessageUtil.colorize("&7ID: &e" + envelope.getShortId()));
+            lore.add(MessageUtil.colorize("&7Total: &a" + String.format("%.2f", envelope.getTotalAmount())));
+            lore.add(MessageUtil.colorize("&7Count: &e" + envelope.getTotalCount()));
+            lore.add(MessageUtil.colorize("&7Remaining: &b" + envelope.getRemainingCount()));
+            lore.add(MessageUtil.colorize("&7Expires: &c" + DATE_FORMAT.format(new Date(envelope.getExpireTime()))));
+            lore.add(MessageUtil.colorize(""));
+            lore.add(MessageUtil.colorize("&eClick to claim!"));
+        } else {
+            for (String line : loreTemplate) {
+                lore.add(MessageUtil.colorize(line
+                        .replace("{name}", envelope.getName())
+                        .replace("{id}", envelope.getShortId())
+                        .replace("{amount}", String.format("%.2f", envelope.getTotalAmount()))
+                        .replace("{count}", String.valueOf(envelope.getTotalCount()))
+                        .replace("{remaining}", String.valueOf(envelope.getRemainingCount()))
+                        .replace("{expire}", DATE_FORMAT.format(new Date(envelope.getExpireTime())))));
+            }
         }
 
         meta.setLore(lore);
@@ -140,9 +152,10 @@ public class GUIManager implements Listener {
     private ItemStack createInfoItem(int total) {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(MessageUtil.colorize("&6&l红包信息"));
+        meta.setDisplayName(MessageUtil.colorize(MessageUtil.getRawMessage("gui.info-name", "&6&lRed Envelope Info")));
         List<String> lore = new ArrayList<>();
-        lore.add(MessageUtil.colorize("&7可领取红包数: &e" + total));
+        String loreText = MessageUtil.getRawMessage("gui.info-lore", "&7Available: &e{count}").replace("{count}", String.valueOf(total));
+        lore.add(MessageUtil.colorize(loreText));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
@@ -151,10 +164,17 @@ public class GUIManager implements Listener {
     private ItemStack createEmptyItem() {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(MessageUtil.colorize("&c&l暂无红包"));
+        meta.setDisplayName(MessageUtil.colorize(MessageUtil.getRawMessage("gui.empty-title", "&c&lNo Red Envelopes")));
         List<String> lore = new ArrayList<>();
-        lore.add(MessageUtil.colorize("&7当前没有可领取的红包"));
-        lore.add(MessageUtil.colorize("&7请稍后再来查看!"));
+        List<String> emptyLore = MessageUtil.getRawMessageList("gui.empty-lore");
+        if (emptyLore.isEmpty()) {
+            lore.add(MessageUtil.colorize("&7No red envelopes available"));
+            lore.add(MessageUtil.colorize("&7Please check back later!"));
+        } else {
+            for (String line : emptyLore) {
+                lore.add(MessageUtil.colorize(line));
+            }
+        }
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

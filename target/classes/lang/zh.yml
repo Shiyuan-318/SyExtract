@@ -1,0 +1,84 @@
+# SyExtract 简体中文语言文件
+# Author: Shiyuan
+# Year: 2026
+
+# 消息前缀
+prefix: "&8[&cSyExtract&8] &r"
+
+# 成功消息
+success:
+  create: "&a成功创建红包! ID: &e{id} &a扣除金额: &e{amount} &a(含手续费: &e{fee}&a)"
+  claim: "&a恭喜! 你领取了 &e{sender} &a的红包, 获得 &6{amount} &a金币!"
+  reload: "&a配置重载成功!"
+  ban: "&a成功封禁玩家 &e{player} &a, 到期时间: &c{expire}"
+  unban: "&a成功解封玩家 &e{player}"
+  broadcast: "&a成功广播红包 &e{id}"
+
+# 错误消息
+error:
+  no-permission: "&c你没有权限执行此操作!"
+  no-vault: "&c未找到Vault插件, 无法使用经济功能!"
+  insufficient-balance: "&c你的余额不足! 需要: &e{amount} &c金币"
+  invalid-amount: "&c无效的金额!"
+  invalid-count: "&c无效的数量! 必须在 &e{min} &c到 &e{max} &c之间"
+  envelope-not-found: "&c红包不存在或已过期!"
+  already-claimed: "&c你已经领取过这个红包了!"
+  no-envelopes: "&c当前没有可领取的红包!"
+  player-not-found: "&c玩家不存在!"
+  banned-create: "&c你已被封禁发放红包权限! 解封时间: &e{expire}"
+  banned-claim: "&c你已被封禁领取红包权限! 解封时间: &e{expire}"
+  invalid-time: "&c无效的时间格式! 请使用: 1h, 1d, 1w 等"
+  invalid-id: "&c无效的红包ID!"
+
+# 提示消息
+info:
+  refund: "&a你的红包 &e{name} &a已过期, 未领取的 &6{amount} &a金币已原路返回!"
+  no-envelopes-available: "&7当前没有可领取的红包"
+  help:
+    - "&6========== &cSyExtract &6=========="
+    - "&e/sye create <名称> <金额> <数量> &7- 创建红包"
+    - "&e/sye open &7- 打开红包GUI"
+    - "&e/sye broadcast <红包ID> &7- 广播红包"
+    - "&e/sye claim <红包ID> &7- 领取指定红包"
+    - "&e/sye ban <玩家> <时间> &7- 封禁玩家"
+    - "&e/sye unban <玩家> &7- 解封玩家"
+    - "&e/sye reload &7- 重载配置"
+    - "&6================================"
+
+# GUI 文本
+gui:
+  title: "&c&l红包大厅"
+  empty-title: "&c&l暂无红包"
+  empty-lore:
+    - "&7当前没有可领取的红包"
+    - "&7请稍后再来查看!"
+  info-name: "&6&l红包信息"
+  info-lore: "&7可领取红包数: &e{count}"
+  previous-page: "&e上一页"
+  next-page: "&e下一页"
+  envelope-name: "&6&l{sender} &e的红包"
+  envelope-lore:
+    - "&7红包名称: &f{name}"
+    - "&7红包ID: &e{id}"
+    - "&7总金额: &a{amount}"
+    - "&7总数量: &e{count}"
+    - "&7剩余数量: &b{remaining}"
+    - "&7过期时间: &c{expire}"
+    - ""
+    - "&e点击领取红包!"
+
+# 广播消息
+broadcast:
+  format: "&6&l🧧 红包来袭! &e{sender} &7发放了一个红包 &6&l[{name}] &7总金额: &a{amount} &7金币"
+  click-text: "&a&l[立即领取]"
+  hover-text: "&e点击领取红包!"
+  envelope-completed: "&6&l🎉 红包通知 &r&7标题为 &e{name} &7的红包被领完了，&6{player} &7是手气王，领到了 &e{amount} &7金币！"
+
+# 命令用法
+command:
+  usage-create: "&c用法: /sye create <名称> <金额> <数量>"
+  usage-ban: "&c用法: /sye ban <玩家名> <时间>"
+  usage-ban-time: "&7时间格式: 1h=1小时, 1d=1天, 1w=1周"
+  usage-unban: "&c用法: /sye unban <玩家名>"
+  usage-broadcast: "&c用法: /sye broadcast <红包ID>"
+  usage-claim: "&c用法: /sye claim <红包ID>"

@@ -6,11 +6,11 @@
 
     <groupId>com.shiyuan</groupId>
     <artifactId>SyExtract</artifactId>
-    <version>1.2.1</version>
+    <version>1.4.0</version>
     <packaging>jar</packaging>
 
     <name>SyExtract</name>
-    <description>Minecraft Red Envelope Plugin for Purpur 1.21.11</description>
+    <description>Minecraft Red Envelope Plugin for Paper/Purpur 1.21</description>
 
     <properties>
         <java.version>17</java.version>
@@ -21,26 +21,21 @@
 
     <repositories>
         <repository>
-            <id>purpur</id>
-            <name>Purpur Repository</name>
-            <url>https://repo.purpurmc.org/snapshots</url>
+            <id>papermc</id>
+            <name>PaperMC Repository</name>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <repository>
             <id>jitpack.io</id>
             <name>JitPack</name>
             <url>https://jitpack.io</url>
         </repository>
-        <repository>
-            <id>spigot-repo</id>
-            <name>Spigot Repository</name>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>org.purpurmc.purpur</groupId>
-            <artifactId>purpur-api</artifactId>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
             <version>1.21.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>

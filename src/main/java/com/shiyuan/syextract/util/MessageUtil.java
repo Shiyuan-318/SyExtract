@@ -15,24 +15,31 @@ public class MessageUtil {
     }
 
     public static String getMessage(String path) {
-        String prefix = SyExtractPlugin.getInstance().getConfig().getString("messages.prefix", "&8[&cSyExtract&8] &r");
-        String message = SyExtractPlugin.getInstance().getConfig().getString("messages." + path, "&c消息未找到: " + path);
-        return colorize(prefix + message);
+        return SyExtractPlugin.getInstance().getLanguageManager().getMessage(path);
     }
 
     public static String getMessage(String path, Map<String, String> placeholders) {
-        String message = getMessage(path);
-        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-            message = message.replace("{" + entry.getKey() + "}", entry.getValue());
-        }
-        return message;
+        return SyExtractPlugin.getInstance().getLanguageManager().getMessage(path, placeholders);
+    }
+
+    public static String getMessage(String path, Map<String, String> placeholders, String defaultMessage) {
+        return SyExtractPlugin.getInstance().getLanguageManager().getMessage(path, placeholders, defaultMessage);
+    }
+
+    public static String getRawMessage(String path) {
+        return SyExtractPlugin.getInstance().getLanguageManager().getRawMessage(path);
+    }
+
+    public static String getRawMessage(String path, String defaultValue) {
+        return SyExtractPlugin.getInstance().getLanguageManager().getRawMessage(path, defaultValue);
     }
 
     public static List<String> getMessageList(String path) {
-        List<String> messages = SyExtractPlugin.getInstance().getConfig().getStringList("messages." + path);
-        return messages.stream()
-                .map(MessageUtil::colorize)
-                .collect(Collectors.toList());
+        return SyExtractPlugin.getInstance().getLanguageManager().getMessageList(path);
+    }
+
+    public static List<String> getRawMessageList(String path) {
+        return SyExtractPlugin.getInstance().getLanguageManager().getRawMessageList(path);
     }
 
     public static void sendMessage(org.bukkit.command.CommandSender sender, String path) {
